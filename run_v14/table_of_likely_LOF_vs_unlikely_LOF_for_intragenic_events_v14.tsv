@@ -1,0 +1,33 @@
+Placement of breakpoints	Deletion cases	Tandem duplication cases	Inversions cases
+before_gene-before_gene	UL	UL	UL
+before_gene-promoter	UL	UL	UL
+before_gene-5'UTR	LL	UL	LL
+before_gene-exon	LL	UL	LL
+before_gene-intron	LL	UL	LL
+before_gene-3'UTR	LL	UL	UL
+before_gene-after_gene	LL	UL	UL
+promoter-promoter	UL	UL	UL
+promoter-5'UTR	LL	UL	LL
+promoter-exon	LL	UL	LL
+promoter-intron	LL	UL	LL
+promoter-3'UTR	LL	UL	UL
+promoter-after_gene	LL	UL	UL
+5'UTR-5'UTR	UL	UL	UL
+5'UTR-exon	LL	UL	LL
+5'UTR-intron	LL	UL	LL
+5'UTR-3'UTR	LL	UL	LL
+5'UTR-after_gene	LL	UL	LL
+exon-exon (in-frame)	LL	UL	LL
+exon-exon (out-of-frame)	LL	LL	LL
+exon-intron (in-frame)	LL	UL	LL
+exon-intron (out-of-frame)	LL	LL	LL
+exon-3'UTR	LL	UL	LL
+exon-after_gene	LL	UL	LL
+intron-intron (in-frame)	LL	UL	LL
+intron-intron (out-of-frame)	LL	LL	LL
+intron-intron (within same intron)	UL	UL	UL
+intron-3'UTR	LL	UL	LL
+intron-after_gene	LL	UL	LL
+3'UTR-3'UTR	UL	UL	UL
+3'UTR-after_gene	UL	UL	UL
+after_gene-after_gene	UL	UL	UL

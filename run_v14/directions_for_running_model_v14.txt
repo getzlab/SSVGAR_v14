@@ -1,0 +1,71 @@
+This is the set of directions necessary to run the v14 SSVGAR model:
+
+
+
+##### SETUP
+
+1. There is a docker image which can be used to run SSVGAR. Please ensure you have docker installed on your machine and run the command 
+   "docker run -it xloinaz/ssvgar:v14 /bin/bash".
+
+   (As a side note and for documentation purposes, this docker repository was created by running the commands below from this current directory 
+   [using the Dockerfile in this directory]:
+   """
+   docker build --no-cache -t xloinaz/ssvgar:v14 .
+   docker push xloinaz/ssvgar:v14
+   """
+   But there's no need to run these commands yourself!)
+
+2. Detach from your interactive docker session by pressing ctrl+p followed by ctrl+q from within the session. Then you want to copy your cohort 
+   SV list you want to input to SSVGAR (see manuscript for specifications on appropriate file format) into the running docker container. In order 
+   to do this, you can first find which container you just detached from by running "docker ps". Its container ID will be listed under the 
+   "CONTAINER ID" column. Then, you want to run the command "docker cp <path_to_your_cohort_SV_list_file> <container_id>:<your_choice_of_directory_within_the_container>".
+
+   For example, if I want to copy my cohort SV list file "xavis_SV_list.tsv" to my running SSVGAR docker container with container ID "bd7ffabb6c9b"
+   in the directory "/SSVGAR" from the same directory the file is located in, I would run the command "docker cp xavis_SV_list.tsv bd7ffabb6c9b:/SSVGAR".
+
+3. Run the command "docker attach <container_id>", and then within the docker container run "cd /SSVGAR/run_v14" to navigate into the appropriate 
+   directory from which we would like to run v14 of SSVGAR. 
+
+
+
+##### ACTUALLY RUNNING SSVGAR (AND DOWNSTREAM ANALYSES/VISUALIZATIONS)
+
+4. It's time to actually run SSVGAR. Please run the command "python run_SSVGAR_v14.py --cohort <cohort_you_want_to_run_on> --SV_list_path <path_to_your_cohort_SV_list_file>"
+   where <cohort_you_want_to_run_on> is the name of the cohort for which you're running SSVGAR (any name is OK — choose it to be whatever you want) 
+   and <path_to_your_cohort_SV_list_file> is the path (relative or absolute) to the SV list file you want to use (that you copied in from step 2). 
+   Your <cohort_you_want_to_run_on> should map to a specific <path_to_your_cohort_SV_list_file> and vice versa. You can also specify SSVGAR's 
+   windowing parameter by specifying an integer value for the "--distance_threshold" option which you can add to the command as well. The results of
+   your run once finished can be found in the directory ../model_results relative to this directory within a folder of the name <cohort_you_want_to_run_on>.
+
+5. It's time to run multiple test correction to produce SSVGAR's final SV hit list, as well as add auxiliary informational columns about such putative
+   hits. Please run the command "python evaluate_results_for_LOF_v14_analysis_just_LOF_model.py --cohort <cohort_you_want_to_run_on> --min_num_patients_with_SV_for_gene_cutoff_for_FDR <minimum_num_of_patients_with_correponding_SV_to_gene_to_be_used_for_FDR>" 
+   where <cohort_you_want_to_run_on> is the same name of the cohort for which you ran SSVGAR in step 4 and <minimum_num_of_patients_with_correponding_SV_to_gene_to_be_used_for_FDR>
+   is the minimum number of patients which must have an SV corresponding to a gene for that gene to be considered for our multiple test correction. The 
+   default for this value is 5. You can also specify the same windowing parameter you used for step 4 by specifying an integer value for the "--distance_threshold" 
+   option, which you can add to the command as well. The results of running this can also be found in the directory ../model_results/<cohort_you_want_to_run_on> 
+   relative to this directory, where there will be a file which includes the FDR correction with additional auxiliary informational columns of the 
+   results, as well as a similar file that is filtered for hits with a q-value less than 0.25.
+
+6. You can produce QQ plots corresponding to the results from steps 4 and step 5. Please run the command "python produce_QQ_plot_for_LOF_v14_analysis.py 
+   --cohort <cohort_you_want_to_run_on> --min_num_patients_with_SV_for_gene_cutoff_for_FDR <minimum_num_of_patients_with_correponding_SV_to_gene_to_be_used_for_FDR>" 
+   where <cohort_you_want_to_run_on> is the same name of the cohort for which you ran SSVGAR in steps 4 and 5. You should use the same value for the 
+   "--min_num_patients_with_SV_for_gene_cutoff_for_FDR" option that you used in step 5. You should also use the same windowing parameter you used in 
+   steps 4 and 5 by specifying an integer value for the "--distance_threshold" option if you manually set this parameter for steps 4 and 5. You can 
+   also specify a y-axis cutoff for the QQ plots by specifying a number for the "--neg_log10_cutoff_for_plot" option — this is the number that would 
+   be the -log10 of the observed p-values. Additionally, you can run p-mid adjustment by adding in the "--use_p_mid" option. The results for running 
+   this script can be found in the directory ../model_results/<cohort_you_want_to_run_on> relative to this directory, where there within that directory 
+   there will be a "QQ_plots" folder with the results. 
+
+7. To produce CoMut-like plots from the results of running SSVGAR (which show LoF and non-LoF SVs for certain genes), run "python generate_SV_CoMut_like_plot_based_off_LoF_significance_model_results_v14.py 
+   --cohort <cohort_you_want_to_run_on> --min_num_patients_with_SV_for_gene_cutoff_for_FDR <minimum_num_of_patients_with_correponding_SV_to_gene_to_be_used_for_FDR>"
+   from the run_v14 directory. You should use the <cohort_you_want_to_run_on> from steps 4, 5, and 6 and the <minimum_num_of_patients_with_correponding_SV_to_gene_to_be_used_for_FDR>
+   value from steps 5 and 6. If you anually specified a windowing parameter for steps 4, 5, and 6, you should use that with the "--distance_threshold" 
+   option. The results for running this script can be found in the directory ../model_results/<cohort_you_want_to_run_on> relative to this directory, 
+   where there within that directory there will be a "CoMut_like_plots" folder with the results.
+
+
+# TODO: Need to include steps to produce Circos plots for genes as well as to include an efficient power analysis as appropriate. Also would be nice to 
+#       include plots showing the distributions of breakpoints.
+
+# TODO: Need to incorporate RNA-seq data as appropriate. Some cohorts do not have RNA-seq data and it's weird accounting for each cohort, though. 
+
